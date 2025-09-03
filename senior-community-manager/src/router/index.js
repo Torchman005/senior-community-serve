@@ -27,6 +27,30 @@ const router = createRouter({
           },
           component: () => import('@/views/Data.vue'),
         },
+        {
+          path: 'service-trend',
+          name: 'serviceTrend',
+          meta: {
+            title: '服务需求趋势',
+          },
+          component: () => import('@/views/ServiceTrend.vue'),
+        },
+        {
+          path: 'activity-participation',
+          name: 'activityParticipation',
+          meta: {
+            title: '活动参与度',
+          },
+          component: () => import('@/views/ActivityParticipation.vue'),
+        },
+        {
+          path: 'user-feedback',
+          name: 'userFeedback',
+          meta: {
+            title: '用户反馈分析',
+          },
+          component: () => import('@/views/UserFeedback.vue'),
+        },
       ]
     },
     {
