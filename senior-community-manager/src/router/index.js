@@ -20,12 +20,20 @@ const router = createRouter({
           component: () => import('@/views/Homepage.vue'),
         },
         {
-          path: 'data',
-          name: 'data',
+          path: 'user',
+          name: 'user',
           meta: {
-            title: '数据统计',
+            title: '用户管理',
           },
-          component: () => import('@/views/Data.vue'),
+          component: () => import('@/views/User.vue'),
+        },
+        {
+          path: 'employee',
+          name: 'employee',
+          meta: {
+            title: '员工管理',
+          },
+          component: () => import('@/views/Employee.vue'),
         },
         {
           path: 'service-trend',

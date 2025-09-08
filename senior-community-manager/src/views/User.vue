@@ -31,10 +31,13 @@
         >
             <el-table-column type="selection" width="55"></el-table-column>
             <el-table-column prop="id" label="ID" width="80"></el-table-column>
-            <el-table-column prop="name" label="姓名" width="180" />
-            <el-table-column prop="age" label="年龄" width="100" />
-            <el-table-column prop="address" label="地址" />
-            <el-table-column label="操作" width="180" fixed="right">
+            <el-table-column prop="name" label="姓名" width="100" />
+            <el-table-column prop="sex" label="性别"width="100" />
+            <el-table-column prop="age" label="年龄" />
+            <el-table-column prop="no" label="编号"/>
+            <el-table-column prop="phoneNumber" label="电话号码" width="180"></el-table-column>
+            <el-table-column prop="description" label="描述" width="180"></el-table-column>
+            <el-table-column label="操作" width="200" fixed="right">
                 <template #default="scope">
                     <el-button type="primary" size="small" @click="handleEdit(scope.row)">
                         编辑
@@ -63,11 +66,20 @@
             <el-form-item label="姓名" prop="name">
                 <el-input v-model="formData.name" placeholder="请输入姓名" />
             </el-form-item>
+            <el-form-item label="性别" prop="sex">
+                <el-input v-model="formData.sex" placeholder="请输入性别" />
+            </el-form-item>
             <el-form-item label="年龄" prop="age">
                 <el-input v-model.number="formData.age" placeholder="请输入年龄" type="number" />
             </el-form-item>
-            <el-form-item label="地址" prop="address">
-                <el-input v-model="formData.address" placeholder="请输入地址" />
+            <el-form-item label="编号" prop="no">
+                <el-input v-model="formData.no" placeholder="请输入编号" />
+            </el-form-item>
+            <el-form-item label="电话号码" prop="phoneNumber">
+                <el-input v-model="formData.phoneNumber" placeholder="请输入电话号码" />
+            </el-form-item>
+            <el-form-item label="描述" prop="descrption">
+                <el-input v-model="formData.description" placeholder="请输入描述" />
             </el-form-item>
         </el-form>
         <template #footer>

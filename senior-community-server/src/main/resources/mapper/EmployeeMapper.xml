@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+        PUBLIC ".//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.luminous.senior_community_server.mapper.EmployeeMapper">
+
+
+    <select id="selectAll" resultType="com.luminous.senior_community_server.bean.Employee">
+        select * from employee
+    </select>
+
+    <insert id="insert" parameterType="com.luminous.senior_community_server.bean.Employee">
+        insert into `employee` (name, sex, no, age, description, phone_number) values (#{name}, #{sex}, #{no}, #{age}, #{description}, #{phoneNumber})
+    </insert>
+
+    <update id="updateById" parameterType="com.luminous.senior_community_server.bean.Employee">
+        update `employee` set name = #{name}, sex = #{sex}, no = #{no}, age = #{age}, description = #{description}, phone_number = #{phoneNumber} where id = #{id}
+    </update>
+</mapper>

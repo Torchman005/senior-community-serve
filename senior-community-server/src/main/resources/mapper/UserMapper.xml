@@ -3,7 +3,7 @@
         PUBLIC ".//mybatis.org//DTD Mapper 3.0//EN"
         "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
 <mapper namespace="com.luminous.senior_community_server.mapper.UserMapper">
-   
+
 
     <select id="selectAll" resultType="com.luminous.senior_community_server.bean.User">
         select * from user

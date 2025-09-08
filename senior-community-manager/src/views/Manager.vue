@@ -22,9 +22,18 @@
                 <el-menu-item index="/manager/homepage" style="color: #d48804">
                   <el-icon style="margin-right: 5px;"><House style="color: #d48804"/></el-icon>
                   系统首页</el-menu-item>
-                <el-menu-item index="/manager/data" style="color: #d48804">
-                  <el-icon style="margin-right: 5px;"><User style="color: #d48804"/></el-icon>
-                  用户数据管理</el-menu-item>
+                  <el-sub-menu>
+                    <template #title>
+                      <el-icon style="margin-right: 5px;"><User style="color: #d48804"/></el-icon>
+                      <span style="color: #d48804">人员管理</span>
+                    </template>
+                    <el-menu-item index="/manager/employee" style="color: #d48804">
+                      <el-icon style="margin-right: 5px;"><User style="color: #d48804"/></el-icon>
+                      员工管理</el-menu-item>
+                    <el-menu-item index="/manager/user" style="color: #d48804">
+                      <el-icon style="margin-right: 5px;"><User style="color: #d48804"/></el-icon>
+                      用户管理</el-menu-item>
+                  </el-sub-menu>
                 <el-menu-item index="/manager/service-trend" style="color: #d48804">
                   <el-icon style="margin-right: 5px;"><PieChart style="color: #d48804"/></el-icon>
                   服务需求趋势</el-menu-item>
