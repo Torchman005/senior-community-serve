@@ -4,9 +4,18 @@ public class Employee {
     private Integer id;
     private String name;
     private Integer age;
+    private String departmentName;
     private String phoneNumber;
     private String sex;
     private String no;
+
+    public String getDepartmentName() {
+        return departmentName;
+    }
+
+    public void setDepartmentName(String departmentName) {
+        this.departmentName = departmentName;
+    }
 
     public String getPhoneNumber() {
         return phoneNumber;

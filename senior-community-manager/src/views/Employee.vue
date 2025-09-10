@@ -34,6 +34,7 @@
             <el-table-column prop="name" label="姓名" width="100" />
             <el-table-column prop="sex" label="性别"width="100" />
             <el-table-column prop="age" label="年龄" />
+            <el-table-column prop="departmentName" label="部门" width="100" />
             <el-table-column prop="no" label="编号"/>
             <el-table-column prop="phoneNumber" label="电话号码" width="180"></el-table-column>
             <el-table-column label="操作" width="200" fixed="right">
@@ -71,6 +72,9 @@
             <el-form-item label="年龄" prop="age">
                 <el-input v-model.number="formData.age" placeholder="请输入年龄" type="number" />
             </el-form-item>
+            <el-form-item label="部门" prop="departmentName">
+                <el-input v-model="formData.departmentName" placeholder="请输入部门" />
+            </el-form-item>
             <el-form-item label="编号" prop="no">
                 <el-input v-model="formData.no" placeholder="请输入编号" />
             </el-form-item>
@@ -92,104 +96,16 @@
     import { reactive, ref, computed, nextTick } from 'vue'
     import { Search, Delete, Refresh, Plus } from '@element-plus/icons-vue'
     import { ElMessage, ElMessageBox } from 'element-plus'
+    import request from '@/utils/request'
+    import { onUpdated } from 'vue'
+    import { ElPagination } from 'element-plus'
 
     const data = reactive({
         name: '',
         currentPage: 1,
         pageSize: 10,
         total: 0,
-        originalData: [
-            {
-                id: 1,
-                name: '张三',
-                age: 65,
-                address: '北京市朝阳区'
-            },
-            {
-                id: 2,
-                name: '李四',
-                age: 72,
-                address: '北京市海淀区'
-            },
-            {
-                id: 3,
-                name: '王五',
-                age: 68,
-                address: '北京市西城区'
-            },
-            {
-                id: 4,
-                name: '赵六',
-                age: 75,
-                address: '北京市东城区'
-            },
-            {
-                id: 5,
-                name: '钱七',
-                age: 62,
-                address: '北京市丰台区'
-            },
-            {
-                id: 6,
-                name: '孙八',
-                age: 70,
-                address: '北京市石景山区'
-            },
-            {
-                id: 7,
-                name: '周九',
-                age: 66,
-                address: '北京市通州区'
-            },
-            {
-                id: 8,
-                name: '吴十',
-                age: 69,
-                address: '北京市昌平区'
-            },
-            {
-                id: 9,
-                name: '郑十一',
-                age: 73,
-                address: '北京市大兴区'
-            },
-            {
-                id: 10,
-                name: '王十二',
-                age: 64,
-                address: '北京市顺义区'
-            },
-            {
-                id: 11,
-                name: '李十三',
-                age: 71,
-                address: '北京市房山区'
-            },
-            {
-                id: 12,
-                name: '张十四',
-                age: 67,
-                address: '北京市门头沟区'
-            },
-            {
-                id: 13,
-                name: '刘十五',
-                age: 74,
-                address: '北京市平谷区'
-            },
-            {
-                id: 14,
-                name: '陈十六',
-                age: 63,
-                address: '北京市怀柔区'
-            },
-            {
-                id: 15,
-                name: '杨十七',
-                age: 68,
-                address: '北京市密云区'
-            }
-        ]
+        originalData: []
     })
 
     // 状态变量
@@ -198,12 +114,31 @@
     const dialogVisible = ref(false)
     const formRef = ref(null)
     const editingId = ref(null)
+
+    const load = () => {
+        loading.value = true
+        request.get('/employee/selectAll',{
+            params: {
+                pageNum: data.currentPage,
+                pageSize: data.pageSize
+            }
+        }).then(res => {
+            data.originalData = res.data.list
+            
+        })
+    }
+    onUpdated(() => {
+        load()
+    })
     
     // 表单数据和规则
     const formData = reactive({
         name: '',
         age: '',
-        address: ''
+        sex: '',
+        no: '',
+        phoneNumber: '',
+        departmentName: ''
     })
     
     const formRules = {
@@ -214,8 +149,17 @@
             { required: true, message: '请输入年龄', trigger: 'blur' },
             { type: 'number', min: 0, max: 120, message: '年龄应在0-120之间', trigger: 'blur' }
         ],
-        address: [
-            { required: true, message: '请输入地址', trigger: 'blur' }
+        sex: [
+            { required: true, message: '请输入性别', trigger: 'blur' }
+        ],
+        no: [
+            { required: true, message: '请输入编号', trigger: 'blur' }
+        ],
+        phoneNumber: [
+            { required: true, message: '请输入电话号码', trigger: 'blur' }
+        ],
+        departmentName: [
+            { required: true, message: '请输入部门', trigger: 'blur' }
         ]
     }
     
@@ -262,7 +206,10 @@
         editingId.value = null
         formData.name = ''
         formData.age = ''
-        formData.address = ''
+        formData.sex = ''
+        formData.no = ''
+        formData.phoneNumber = ''
+        formData.departmentName = ''
         dialogVisible.value = true
     }
     
@@ -271,7 +218,10 @@
         editingId.value = row.id
         formData.name = row.name
         formData.age = row.age
-        formData.address = row.address
+        formData.sex = row.sex
+        formData.no = row.no
+        formData.phoneNumber = row.phoneNumber
+        formData.departmentName = row.departmentName
         dialogVisible.value = true
     }
     

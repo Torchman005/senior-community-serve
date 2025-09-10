@@ -16,13 +16,11 @@ public class EmployeeService {
     private EmployeeMapper employeeMapper;
 
     public List<Employee> selectAll(){
-        List<Employee> list = employeeMapper.selectAll();
-        return list;
+        return employeeMapper.selectAll();
     }
 
     public Employee selectById(Integer id){
-        Employee employee = employeeMapper.selectById(id);
-        return employee;
+        return employeeMapper.selectById(id);
     }
 
     //    数据分页
