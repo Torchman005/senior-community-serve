@@ -169,28 +169,6 @@ npm run build
 3. 配置数据库连接和Redis连接
 4. 确保防火墙开放相应端口
 
-## 🤝 贡献指南
-
-1. Fork 本仓库
-2. 创建特性分支 (`git checkout -b feature/AmazingFeature`)
-3. 提交更改 (`git commit -m 'Add some AmazingFeature'`)
-4. 推送到分支 (`git push origin feature/AmazingFeature`)
-5. 开启 Pull Request
-
-## 📄 许可证
-
-本项目采用 MIT 许可证 - 查看 [LICENSE](LICENSE) 文件了解详情
-
-## 📞 联系方式
-
-如有问题或建议，请通过以下方式联系：
-- 项目Issues: [GitHub Issues]()
-- 邮箱: [your-email@example.com]()
-
-## 🙏 致谢
-
-感谢所有为本项目做出贡献的开发者和社区成员！
-
 ---
 
 **注**: 本项目旨在为养老社区提供数字化服务解决方案，提升老年人的生活便利性和社区服务效率。
