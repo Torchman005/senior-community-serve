@@ -30,6 +30,8 @@
             element-loading-text="加载中..."
         >
             <el-table-column type="selection" width="55"></el-table-column>
+            <el-table-column prop="username" label="账号" width="120"></el-table-column>
+            <el-table-column prop="role" label="角色" width="120"></el-table-column>
             <el-table-column prop="id" label="ID" width="80"></el-table-column>
             <el-table-column prop="name" label="姓名" width="100" />
             <el-table-column prop="sex" label="性别"width="100" />
@@ -63,6 +65,15 @@
     <!-- 新增/编辑对话框 -->
     <el-dialog v-model="dialogVisible" title="用户信息" width="500px">
         <el-form :model="formData" :rules="formRules" ref="formRef">
+            <el-form-item label="账号" prop="username">
+                <el-input v-model="formData.username" placeholder="请输入账号" />
+            </el-form-item>
+            <el-form-item label="密码" prop="password">
+                <el-input v-model="formData.password" placeholder="请输入密码" type="password" />
+            </el-form-item>
+            <el-form-item label="角色" prop="role">
+                <el-input v-model="formData.role" placeholder="请输入角色" />
+            </el-form-item>
             <el-form-item label="姓名" prop="name">
                 <el-input v-model="formData.name" placeholder="请输入姓名" />
             </el-form-item>
@@ -78,7 +89,7 @@
             <el-form-item label="电话号码" prop="phoneNumber">
                 <el-input v-model="formData.phoneNumber" placeholder="请输入电话号码" />
             </el-form-item>
-            <el-form-item label="描述" prop="descrption">
+            <el-form-item label="描述" prop="description">
                 <el-input v-model="formData.description" placeholder="请输入描述" />
             </el-form-item>
         </el-form>
@@ -93,9 +104,10 @@
 </template>
 
 <script lang="js" name="Data" setup>
-    import { reactive, ref, computed, nextTick } from 'vue'
+    import { reactive, ref, computed, nextTick, onMounted } from 'vue'
     import { Search, Delete, Refresh, Plus } from '@element-plus/icons-vue'
     import { ElMessage, ElMessageBox } from 'element-plus'
+    import { userApi } from '@/api/index'
 
     const data = reactive({
         name: '',
@@ -111,6 +123,37 @@
     const dialogVisible = ref(false)
     const formRef = ref(null)
     const editingId = ref(null)
+
+    const load = async () => {
+        try {
+            loading.value = true
+            const params = {
+                page: data.currentPage,
+                size: data.pageSize,
+                name: data.name || undefined
+            }
+            const response = await userApi.getUserList(params)
+            console.log('API响应:', response)
+            
+            // 处理后端返回的PageInfo格式数据
+            if (response.data && response.data.list) {
+                data.originalData = response.data.list
+                data.total = response.data.total
+            } else {
+                data.originalData = response.data || []
+                data.total = response.data?.length || 0
+            }
+        } catch (error) {
+            console.error('获取用户数据失败:', error)
+            ElMessage.error('获取用户数据失败，请稍后重试')
+        } finally {
+            loading.value = false
+        }
+    }
+
+    onMounted(() => {
+        load()
+    })
     
     // 表单数据和规则
     const formData = reactive({
@@ -119,7 +162,10 @@
         sex: '',
         no: '',
         phoneNumber: '',
-        description: ''
+        description: '',
+        username: '',
+        password: '',
+        role: ''
     })
     
     const formRules = {
@@ -141,7 +187,17 @@
             { required: true, message: '请输入电话号码', trigger: 'blur' }
         ],
         description: [
-            { required: true, message: '请输入描述', trigger: 'blur' }
+            { message: '请输入描述', trigger: 'blur' }
+        ],
+        username: [
+            { required: true, message: '请输入账号', trigger: 'blur' }
+        ],
+        password: [
+            { required: true, message: '请输入密码', trigger: 'blur' },
+            { min: 6, message: '密码长度至少6位', trigger: 'blur' }
+        ],
+        role: [
+            { required: true, message: '请输入角色', trigger: 'blur' }
         ]
     }
     
@@ -164,12 +220,7 @@
     
     // 处理搜索
     const searchData = () => {
-        loading.value = true
-        // 模拟异步搜索
-        setTimeout(() => {
-            data.currentPage = 1
-            loading.value = false
-        }, 300)
+        load() // 重新加载数据，使用当前的name作为查询条件
     }
     
     // 重置搜索
@@ -192,6 +243,9 @@
         formData.no = ''
         formData.phoneNumber = ''
         formData.description = ''
+        formData.username = ''
+        formData.password = ''
+        formData.role = ''
         dialogVisible.value = true
     }
     
@@ -204,6 +258,9 @@
         formData.no = row.no
         formData.phoneNumber = row.phoneNumber
         formData.description = row.description
+        formData.username = row.username 
+        formData.password = row.password || ''
+        formData.role = row.role 
         dialogVisible.value = true
     }
     
@@ -213,28 +270,52 @@
             await formRef.value.validate()
             
             if (editingId.value) {
-                // 编辑
-                const index = data.originalData.findIndex(item => item.id === editingId.value)
-                if (index !== -1) {
-                    data.originalData[index] = {
-                        ...data.originalData[index],
-                        ...formData
-                    }
-                }
-                ElMessage.success('编辑成功')
-            } else {
-                // 新增
-                const maxId = Math.max(...data.originalData.map(item => item.id))
-                data.originalData.unshift({
-                    id: maxId + 1,
+                // 编辑 - 调用后端update接口
+                const userData = {
+                    id: editingId.value,
                     ...formData
-                })
-                ElMessage.success('新增成功')
+                }
+                
+                loading.value = true
+                console.log('提交编辑数据:', userData)
+                
+                try {
+                    const response = await userApi.updateUser(editingId.value, formData)
+                    console.log('编辑响应:', response)
+                    
+                    // 重新加载数据
+                    load()
+                    ElMessage.success('编辑成功')
+                    dialogVisible.value = false
+                } catch (error) {
+                    console.error('编辑请求失败:', error)
+                    ElMessage.error('编辑失败，请检查数据格式是否正确')
+                } finally {
+                    loading.value = false
+                }
+            } else {
+                // 新增 - 调用后端add接口
+                loading.value = true
+                console.log('提交新增数据:', formData)
+                
+                try {
+                    const response = await userApi.createUser(formData)
+                    console.log('新增响应:', response)
+                    
+                    // 重新加载数据
+                    load()
+                    ElMessage.success('新增成功')
+                    dialogVisible.value = false
+                } catch (error) {
+                    console.error('新增请求失败:', error)
+                    ElMessage.error('新增失败，请检查数据格式是否正确')
+                } finally {
+                    loading.value = false
+                }
             }
-            
-            dialogVisible.value = false
         } catch (error) {
-            console.log('表单验证失败', error)
+            console.error('表单验证失败:', error)
+            ElMessage.error('请检查表单填写是否正确')
         }
     }
     
@@ -248,12 +329,20 @@
                 cancelButtonText: '取消',
                 type: 'danger'
             }
-        ).then(() => {
-            const index = data.originalData.findIndex(item => item.id === row.id)
-            if (index !== -1) {
-                data.originalData.splice(index, 1)
+        ).then(async () => {
+            try {
+                loading.value = true
+                await userApi.deleteUser(row.id)
+                
+                // 重新加载数据
+                load()
+                ElMessage.success('删除成功')
+            } catch (error) {
+                console.error('删除失败:', error)
+                ElMessage.error('删除失败，请稍后重试')
+            } finally {
+                loading.value = false
             }
-            ElMessage.success('删除成功')
         }).catch(() => {
             ElMessage.info('已取消删除')
         })
@@ -269,11 +358,25 @@
                 cancelButtonText: '取消',
                 type: 'danger'
             }
-        ).then(() => {
-            const ids = selectedRows.value.map(item => item.id)
-            data.originalData = data.originalData.filter(item => !ids.includes(item.id))
-            selectedRows.value = []
-            ElMessage.success('删除成功')
+        ).then(async () => {
+            try {
+                loading.value = true
+                
+                // 逐个删除（可以优化为批量删除接口）
+                for (const row of selectedRows.value) {
+                    await userApi.deleteUser(row.id)
+                }
+                
+                // 重新加载数据
+                load()
+                selectedRows.value = []
+                ElMessage.success('删除成功')
+            } catch (error) {
+                console.error('批量删除失败:', error)
+                ElMessage.error('删除失败，请稍后重试')
+            } finally {
+                loading.value = false
+            }
         }).catch(() => {
             ElMessage.info('已取消删除')
         })

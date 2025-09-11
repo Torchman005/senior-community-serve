@@ -22,7 +22,7 @@
                 <el-menu-item index="/manager/homepage" style="color: #d48804">
                   <el-icon style="margin-right: 5px;"><House style="color: #d48804"/></el-icon>
                   系统首页</el-menu-item>
-                  <el-sub-menu>
+                  <el-sub-menu index="1">
                     <template #title>
                       <el-icon style="margin-right: 5px;"><User style="color: #d48804"/></el-icon>
                       <span style="color: #d48804">人员管理</span>
@@ -64,13 +64,14 @@
 import { useRouter } from 'vue-router'
 import { 
   House, 
+  User,
   DataAnalysis, 
   PieChart, 
   Grid, 
   Finished, 
   SwitchButton 
 } from '@element-plus/icons-vue'
-import { ElMessageBox } from 'element-plus'
+import { ElMessageBox, ElMessage } from 'element-plus'
 
   const router = useRouter()
 
@@ -88,8 +89,14 @@ import { ElMessageBox } from 'element-plus'
     )
     .then(() => {
       // 清除登录状态
-      // 实际项目中可能需要清除token等
-      router.push('/')
+      localStorage.removeItem('token')
+      localStorage.removeItem('userInfo')
+      
+      // 显示退出成功消息
+      ElMessage.success('退出登录成功')
+      
+      // 跳转到登录页
+      router.push({ name: 'login' })
     })
     .catch(() => {
       // 用户取消退出

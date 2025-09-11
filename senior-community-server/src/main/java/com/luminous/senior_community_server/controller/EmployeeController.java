@@ -12,46 +12,44 @@ import org.springframework.web.bind.annotation.*;
 import java.util.List;
 
 @RestController
-@RequestMapping("/employee")
+@RequestMapping("/api/employees")
+@CrossOrigin(origins = "*")
 public class EmployeeController {
 
     @Autowired
     private EmployeeService employeeService;
 
-    @GetMapping("/selectAll")
-    public Result selectAll(@RequestParam(defaultValue = "1") Integer pageNum,
-                            @RequestParam(defaultValue = "10") Integer pageSize){
+    @GetMapping
+    public Result getAllEmployees(@RequestParam(defaultValue = "1") Integer pageNum,
+                                @RequestParam(defaultValue = "10") Integer pageSize,
+                                @RequestParam(required = false) String name){
         PageInfo<Employee> pageInfo = employeeService.selectPage(pageNum, pageSize);
         return Result.success(pageInfo);
     }
 
-    //    @GetMapping("/selectById/{id}")
-    @GetMapping("/selectById")
-//    public Result selectById(@PathVariable Integer id){
-//    传对象可以参数随意查询
-//    还有分页查询
-    public Result selectById(@RequestParam Integer id, @RequestParam(required = false) String no){
+    @GetMapping("/{id}")
+    public Result getEmployeeById(@PathVariable Integer id){
         Employee employee = employeeService.selectById(id);
         return Result.success(employee);
     }
 
-    @PostMapping("/add")
-//    将前端传来的json字符串映射出java对象
-    public Result add(@RequestBody Employee employee){
+    @PostMapping
+    public Result createEmployee(@RequestBody Employee employee){
         employeeService.add(employee);
-        return Result.success();
+        return Result.success("员工创建成功");
     }
 
-    @PutMapping("/update")
-    public Result update(@RequestParam Employee employee){
+    @PutMapping("/{id}")
+    public Result updateEmployee(@PathVariable Integer id, @RequestBody Employee employee){
+        employee.setId(id);
         employeeService.update(employee);
-        return Result.success();
+        return Result.success("员工更新成功");
     }
 
-    @DeleteMapping("/delete")
-    public Result delete(@PathVariable Integer id){
+    @DeleteMapping("/{id}")
+    public Result deleteEmployee(@PathVariable Integer id){
         employeeService.delete(id);
-        return Result.success();
+        return Result.success("员工删除成功");
     }
 
 }

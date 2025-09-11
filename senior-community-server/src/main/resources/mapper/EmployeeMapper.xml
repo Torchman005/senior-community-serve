@@ -10,10 +10,10 @@
     </select>
 
     <insert id="insert" parameterType="com.luminous.senior_community_server.bean.Employee">
-        insert into `employee` (name, sex, no, age, phone_number, department_name) values (#{name}, #{sex}, #{no}, #{age}, #{phoneNumber}, #{departmentName})
+        insert into `employee` (username, password, role, name, sex, no, age, phone_number, department_name) values (#{username}, #{password}, #{role}, #{name}, #{sex}, #{no}, #{age}, #{phoneNumber}, #{departmentName})
     </insert>
 
     <update id="updateById" parameterType="com.luminous.senior_community_server.bean.Employee">
-        update `employee` set name = #{name}, sex = #{sex}, no = #{no}, age = #{age}, department_name = #{departmentName}, phone_number = #{phoneNumber} where id = #{id}
+        update `employee` set username = #{username}, password = #{password}, role = #{role}, name = #{name}, sex = #{sex}, no = #{no}, age = #{age}, phone_number = #{phoneNumber}, department_name = #{departmentName} where id = #{id}
     </update>
 </mapper>

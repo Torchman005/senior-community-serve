@@ -43,4 +43,16 @@ public class UserService {
     public void delete(Integer id){
         userMapper.deleteById(id);
     }
+
+    public User login(String username, String password) {
+        User user = userMapper.selectByUsername(username);
+        if (user != null && password.equals(user.getPassword())) {
+            return user;
+        }
+        return null;
+    }
+
+    public User selectByUsername(String username) {
+        return userMapper.selectByUsername(username);
+    }
 }

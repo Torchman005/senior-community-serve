@@ -1,0 +1,81 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.luminous.senior_community_server.mapper.ActivityMapper">
+
+    <resultMap id="ActivityResultMap" type="com.luminous.senior_community_server.bean.Activity">
+        <id property="id" column="id"/>
+        <result property="typeId" column="type_id"/>
+        <result property="title" column="title"/>
+        <result property="description" column="description"/>
+        <result property="startTime" column="start_time"/>
+        <result property="endTime" column="end_time"/>
+        <result property="location" column="location"/>
+        <result property="image" column="image"/>
+        <result property="organizer" column="organizer"/>
+        <result property="participants" column="participants"/>
+        <result property="maxParticipants" column="max_participants"/>
+        <result property="isOnline" column="is_online"/>
+        <result property="status" column="status"/>
+        <result property="createTime" column="create_time"/>
+        <result property="updateTime" column="update_time"/>
+    </resultMap>
+
+    <select id="selectAll" resultMap="ActivityResultMap">
+        SELECT * FROM activities
+        <where>
+            <if test="typeId != null">
+                AND type_id = #{typeId}
+            </if>
+            <if test="status != null and status != ''">
+                AND status = #{status}
+            </if>
+        </where>
+        ORDER BY start_time DESC
+    </select>
+
+    <select id="selectById" resultMap="ActivityResultMap">
+        SELECT * FROM activities WHERE id = #{id}
+    </select>
+
+    <insert id="insert" parameterType="com.luminous.senior_community_server.bean.Activity">
+        INSERT INTO activities (
+            type_id, title, description, start_time, end_time, location,
+            image, organizer, participants, max_participants, is_online,
+            status, create_time, update_time
+        ) VALUES (
+            #{typeId}, #{title}, #{description}, #{startTime}, #{endTime}, #{location},
+            #{image}, #{organizer}, #{participants}, #{maxParticipants}, #{isOnline},
+            #{status}, #{createTime}, #{updateTime}
+        )
+    </insert>
+
+    <update id="update" parameterType="com.luminous.senior_community_server.bean.Activity">
+        UPDATE activities SET
+            type_id = #{typeId},
+            title = #{title},
+            description = #{description},
+            start_time = #{startTime},
+            end_time = #{endTime},
+            location = #{location},
+            image = #{image},
+            organizer = #{organizer},
+            participants = #{participants},
+            max_participants = #{maxParticipants},
+            is_online = #{isOnline},
+            status = #{status},
+            update_time = #{updateTime}
+        WHERE id = #{id}
+    </update>
+
+    <delete id="deleteById">
+        DELETE FROM activities WHERE id = #{id}
+    </delete>
+
+    <update id="updateParticipants">
+        UPDATE activities SET 
+            participants = participants + #{increment},
+            update_time = NOW()
+        WHERE id = #{activityId}
+    </update>
+
+</mapper>

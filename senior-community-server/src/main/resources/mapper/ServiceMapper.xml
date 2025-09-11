@@ -1,0 +1,66 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.luminous.senior_community_server.mapper.ServiceMapper">
+
+    <resultMap id="ServiceResultMap" type="com.luminous.senior_community_server.bean.Service">
+        <id property="id" column="id"/>
+        <result property="categoryId" column="category_id"/>
+        <result property="title" column="title"/>
+        <result property="description" column="description"/>
+        <result property="price" column="price"/>
+        <result property="unit" column="unit"/>
+        <result property="rating" column="rating"/>
+        <result property="image" column="image"/>
+        <result property="provider" column="provider"/>
+        <result property="status" column="status"/>
+        <result property="createTime" column="create_time"/>
+        <result property="updateTime" column="update_time"/>
+    </resultMap>
+
+    <select id="selectAll" resultMap="ServiceResultMap">
+        SELECT * FROM services
+        <where>
+            <if test="categoryId != null">
+                AND category_id = #{categoryId}
+            </if>
+            <if test="status != null and status != ''">
+                AND status = #{status}
+            </if>
+        </where>
+        ORDER BY create_time DESC
+    </select>
+
+    <select id="selectById" resultMap="ServiceResultMap">
+        SELECT * FROM services WHERE id = #{id}
+    </select>
+
+    <insert id="insert" parameterType="com.luminous.senior_community_server.bean.Service">
+        INSERT INTO services (
+            category_id, title, description, price, unit, rating, 
+            image, provider, status, create_time, update_time
+        ) VALUES (
+            #{categoryId}, #{title}, #{description}, #{price}, #{unit}, #{rating},
+            #{image}, #{provider}, #{status}, #{createTime}, #{updateTime}
+        )
+    </insert>
+
+    <update id="update" parameterType="com.luminous.senior_community_server.bean.Service">
+        UPDATE services SET
+            category_id = #{categoryId},
+            title = #{title},
+            description = #{description},
+            price = #{price},
+            unit = #{unit},
+            rating = #{rating},
+            image = #{image},
+            provider = #{provider},
+            status = #{status},
+            update_time = #{updateTime}
+        WHERE id = #{id}
+    </update>
+
+    <delete id="deleteById">
+        DELETE FROM services WHERE id = #{id}
+    </delete>
+
+</mapper>

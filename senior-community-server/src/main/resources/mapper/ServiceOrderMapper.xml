@@ -1,0 +1,109 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.luminous.senior_community_server.mapper.ServiceOrderMapper">
+
+    <resultMap id="ServiceOrderResultMap" type="com.luminous.senior_community_server.bean.ServiceOrder">
+        <id property="id" column="id"/>
+        <result property="userId" column="user_id"/>
+        <result property="serviceId" column="service_id"/>
+        <result property="orderNo" column="order_no"/>
+        <result property="customerName" column="customer_name"/>
+        <result property="customerPhone" column="customer_phone"/>
+        <result property="customerAddress" column="customer_address"/>
+        <result property="serviceDate" column="service_date"/>
+        <result property="serviceTime" column="service_time"/>
+        <result property="description" column="description"/>
+        <result property="emergencyContact" column="emergency_contact"/>
+        <result property="totalAmount" column="total_amount"/>
+        <result property="status" column="status"/>
+        <result property="paymentStatus" column="payment_status"/>
+        <result property="createTime" column="create_time"/>
+        <result property="updateTime" column="update_time"/>
+    </resultMap>
+
+    <select id="selectAll" resultMap="ServiceOrderResultMap">
+        SELECT * FROM service_orders
+        <where>
+            <if test="userId != null">
+                AND user_id = #{userId}
+            </if>
+            <if test="status != null and status != ''">
+                AND status = #{status}
+            </if>
+            <if test="paymentStatus != null and paymentStatus != ''">
+                AND payment_status = #{paymentStatus}
+            </if>
+        </where>
+        ORDER BY create_time DESC
+    </select>
+
+    <select id="selectById" resultMap="ServiceOrderResultMap">
+        SELECT * FROM service_orders WHERE id = #{id}
+    </select>
+
+    <select id="selectByOrderNo" resultMap="ServiceOrderResultMap">
+        SELECT * FROM service_orders WHERE order_no = #{orderNo}
+    </select>
+
+    <insert id="insert" parameterType="com.luminous.senior_community_server.bean.ServiceOrder">
+        INSERT INTO service_orders (
+            user_id, service_id, order_no, customer_name, customer_phone,
+            customer_address, service_date, service_time, description,
+            emergency_contact, total_amount, status, payment_status,
+            create_time, update_time
+        ) VALUES (
+            #{userId}, #{serviceId}, #{orderNo}, #{customerName}, #{customerPhone},
+            #{customerAddress}, #{serviceDate}, #{serviceTime}, #{description},
+            #{emergencyContact}, #{totalAmount}, #{status}, #{paymentStatus},
+            #{createTime}, #{updateTime}
+        )
+    </insert>
+
+    <update id="update" parameterType="com.luminous.senior_community_server.bean.ServiceOrder">
+        UPDATE service_orders SET
+            user_id = #{userId},
+            service_id = #{serviceId},
+            customer_name = #{customerName},
+            customer_phone = #{customerPhone},
+            customer_address = #{customerAddress},
+            service_date = #{serviceDate},
+            service_time = #{serviceTime},
+            description = #{description},
+            emergency_contact = #{emergencyContact},
+            total_amount = #{totalAmount},
+            status = #{status},
+            payment_status = #{paymentStatus},
+            update_time = #{updateTime}
+        WHERE id = #{id}
+    </update>
+
+    <update id="updateStatus">
+        UPDATE service_orders SET
+            status = #{status},
+            update_time = NOW()
+        WHERE id = #{id}
+    </update>
+
+    <update id="updatePaymentStatus">
+        UPDATE service_orders SET
+            payment_status = #{paymentStatus},
+            update_time = NOW()
+        WHERE id = #{id}
+    </update>
+
+    <delete id="deleteById">
+        DELETE FROM service_orders WHERE id = #{id}
+    </delete>
+
+    <select id="getOrderStatistics" resultType="java.util.Map">
+        SELECT 
+            COUNT(*) as totalOrders,
+            SUM(CASE WHEN status = 'PENDING' THEN 1 ELSE 0 END) as pendingOrders,
+            SUM(CASE WHEN status = 'COMPLETED' THEN 1 ELSE 0 END) as completedOrders,
+            SUM(CASE WHEN status = 'CANCELLED' THEN 1 ELSE 0 END) as cancelledOrders,
+            SUM(CASE WHEN payment_status = 'PAID' THEN total_amount ELSE 0 END) as totalRevenue,
+            SUM(CASE WHEN DATE(create_time) = CURDATE() THEN 1 ELSE 0 END) as todayOrders
+        FROM service_orders
+    </select>
+
+</mapper>

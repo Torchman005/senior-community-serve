@@ -30,6 +30,8 @@
             element-loading-text="加载中..."
         >
             <el-table-column type="selection" width="55"></el-table-column>
+            <el-table-column prop="username" label="账号" width="120"></el-table-column>
+            <el-table-column prop="role" label="角色" width="120"></el-table-column>
             <el-table-column prop="id" label="ID" width="80"></el-table-column>
             <el-table-column prop="name" label="姓名" width="100" />
             <el-table-column prop="sex" label="性别"width="100" />
@@ -63,6 +65,15 @@
     <!-- 新增/编辑对话框 -->
     <el-dialog v-model="dialogVisible" title="用户信息" width="500px">
         <el-form :model="formData" :rules="formRules" ref="formRef">
+            <el-form-item label="账号" prop="username">
+                <el-input v-model="formData.username" placeholder="请输入账号" />
+            </el-form-item>
+            <el-form-item label="密码" prop="password">
+                <el-input v-model="formData.password" placeholder="请输入密码" type="password" />
+            </el-form-item>
+            <el-form-item label="角色" prop="role">
+                <el-input v-model="formData.role" placeholder="请输入角色" />
+            </el-form-item>
             <el-form-item label="姓名" prop="name">
                 <el-input v-model="formData.name" placeholder="请输入姓名" />
             </el-form-item>
@@ -93,11 +104,10 @@
 </template>
 
 <script lang="js" name="Data" setup>
-    import { reactive, ref, computed, nextTick } from 'vue'
+    import { reactive, ref, computed, nextTick, onMounted } from 'vue'
     import { Search, Delete, Refresh, Plus } from '@element-plus/icons-vue'
     import { ElMessage, ElMessageBox } from 'element-plus'
-    import request from '@/utils/request'
-    import { onUpdated } from 'vue'
+    import { employeeApi } from '@/api/index'
     import { ElPagination } from 'element-plus'
 
     const data = reactive({
@@ -115,19 +125,34 @@
     const formRef = ref(null)
     const editingId = ref(null)
 
-    const load = () => {
+    const load = async () => {
         loading.value = true
-        request.get('/employee/selectAll',{
-            params: {
+        try {
+            const res = await employeeApi.getEmployeeList({
                 pageNum: data.currentPage,
-                pageSize: data.pageSize
-            }
-        }).then(res => {
-            data.originalData = res.data.list
+                pageSize: data.pageSize,
+                name: data.name
+            })
+            console.log('员工API响应:', res)
             
-        })
+            // 处理后端返回的PageInfo格式数据
+            if (res.data && res.data.list) {
+                data.originalData = res.data.list
+                data.total = res.data.total
+            } else {
+                data.originalData = res.data || []
+                data.total = res.data?.length || 0
+            }
+        } catch (error) {
+            console.error('获取员工数据失败:', error)
+            ElMessage.error('获取员工数据失败，请稍后重试')
+        } finally {
+            loading.value = false
+        }
     }
-    onUpdated(() => {
+    
+    // 组件挂载时加载数据
+    onMounted(() => {
         load()
     })
     
@@ -138,7 +163,10 @@
         sex: '',
         no: '',
         phoneNumber: '',
-        departmentName: ''
+        departmentName: '',
+        username: '',
+        password: '',
+        role: ''
     })
     
     const formRules = {
@@ -160,6 +188,16 @@
         ],
         departmentName: [
             { required: true, message: '请输入部门', trigger: 'blur' }
+        ],
+        username: [
+            { required: true, message: '请输入账号', trigger: 'blur' }
+        ],
+        password: [
+            { required: true, message: '请输入密码', trigger: 'blur' },
+            { min: 6, message: '密码长度不能少于6位', trigger: 'blur' }
+        ],
+        role: [
+            { required: true, message: '请输入角色', trigger: 'blur' }
         ]
     }
     
@@ -182,12 +220,7 @@
     
     // 处理搜索
     const searchData = () => {
-        loading.value = true
-        // 模拟异步搜索
-        setTimeout(() => {
-            data.currentPage = 1
-            loading.value = false
-        }, 300)
+        load() // 重新加载数据，使用当前的name作为查询条件
     }
     
     // 重置搜索
@@ -210,6 +243,9 @@
         formData.no = ''
         formData.phoneNumber = ''
         formData.departmentName = ''
+        formData.username = ''
+        formData.password = ''
+        formData.role = ''
         dialogVisible.value = true
     }
     
@@ -222,6 +258,9 @@
         formData.no = row.no
         formData.phoneNumber = row.phoneNumber
         formData.departmentName = row.departmentName
+        formData.username = row.username || ''
+        formData.password = row.password || ''
+        formData.role = row.role || ''
         dialogVisible.value = true
     }
     
@@ -231,47 +270,81 @@
             await formRef.value.validate()
             
             if (editingId.value) {
-                // 编辑
-                const index = data.originalData.findIndex(item => item.id === editingId.value)
-                if (index !== -1) {
-                    data.originalData[index] = {
-                        ...data.originalData[index],
-                        ...formData
-                    }
-                }
-                ElMessage.success('编辑成功')
-            } else {
-                // 新增
-                const maxId = Math.max(...data.originalData.map(item => item.id))
-                data.originalData.unshift({
-                    id: maxId + 1,
+                // 编辑 - 调用后端update接口
+                const employeeData = {
+                    id: editingId.value,
                     ...formData
-                })
-                ElMessage.success('新增成功')
+                }
+                
+                loading.value = true
+                console.log('提交编辑数据:', employeeData)
+                
+                try {
+                    await employeeApi.updateEmployee(editingId.value, formData)
+                    
+                    // 重新加载数据
+                    load()
+                    ElMessage.success('编辑成功')
+                    dialogVisible.value = false
+                } catch (error) {
+                    console.error('编辑请求失败:', error)
+                    ElMessage.error('编辑失败，请检查数据格式是否正确')
+                } finally {
+                    loading.value = false
+                }
+            } else {
+                // 新增 - 调用后端add接口
+                loading.value = true
+                console.log('提交新增数据:', formData)
+                
+                try {
+                    await employeeApi.createEmployee(formData)
+                    
+                    // 重新加载数据
+                    load()
+                    ElMessage.success('新增成功')
+                    dialogVisible.value = false
+                } catch (error) {
+                    console.error('新增请求失败:', error)
+                    ElMessage.error('新增失败，请检查数据格式是否正确')
+                } finally {
+                    loading.value = false
+                }
             }
             
             dialogVisible.value = false
         } catch (error) {
-            console.log('表单验证失败', error)
+            console.error('提交失败:', error)
+            ElMessage.error('操作失败，请稍后重试')
+        } finally {
+            loading.value = false
         }
     }
     
     // 处理单个删除
     const handleSingleDelete = (row) => {
         ElMessageBox.confirm(
-            `确定要删除用户「${row.name}」吗？`,
+            `确定要删除员工「${row.name}」吗？`,
             '删除确认',
             {
                 confirmButtonText: '确定',
                 cancelButtonText: '取消',
                 type: 'danger'
             }
-        ).then(() => {
-            const index = data.originalData.findIndex(item => item.id === row.id)
-            if (index !== -1) {
-                data.originalData.splice(index, 1)
+        ).then(async () => {
+            try {
+                loading.value = true
+                await employeeApi.deleteEmployee(row.id)
+                
+                // 重新加载数据
+                load()
+                ElMessage.success('删除成功')
+            } catch (error) {
+                console.error('删除失败:', error)
+                ElMessage.error('删除失败，请稍后重试')
+            } finally {
+                loading.value = false
             }
-            ElMessage.success('删除成功')
         }).catch(() => {
             ElMessage.info('已取消删除')
         })
@@ -280,18 +353,32 @@
     // 处理批量删除
     const handleDelete = () => {
         ElMessageBox.confirm(
-            `确定要删除选中的 ${selectedRows.value.length} 个用户吗？`,
+            `确定要删除选中的 ${selectedRows.value.length} 个员工吗？`,
             '删除确认',
             {
                 confirmButtonText: '确定',
                 cancelButtonText: '取消',
                 type: 'danger'
             }
-        ).then(() => {
-            const ids = selectedRows.value.map(item => item.id)
-            data.originalData = data.originalData.filter(item => !ids.includes(item.id))
-            selectedRows.value = []
-            ElMessage.success('删除成功')
+        ).then(async () => {
+            try {
+                loading.value = true
+                
+                // 逐个删除（可以优化为批量删除接口）
+                for (const row of selectedRows.value) {
+                    await employeeApi.deleteEmployee(row.id)
+                }
+                
+                // 重新加载数据
+                load()
+                selectedRows.value = []
+                ElMessage.success('删除成功')
+            } catch (error) {
+                console.error('批量删除失败:', error)
+                ElMessage.error('删除失败，请稍后重试')
+            } finally {
+                loading.value = false
+            }
         }).catch(() => {
             ElMessage.info('已取消删除')
         })
