@@ -38,8 +38,15 @@ public class UserController {
 
     @PostMapping
     public Result createUser(@RequestBody User user){
-        userService.add(user);
-        return Result.success("用户创建成功");
+        try {
+            System.out.println("接收到用户数据: " + user.toString());
+            userService.add(user);
+            return Result.success("用户创建成功");
+        } catch (Exception e) {
+            System.err.println("创建用户失败: " + e.getMessage());
+            e.printStackTrace();
+            return Result.error("500", "创建用户失败: " + e.getMessage());
+        }
     }
 
     @PutMapping("/{id}")
@@ -68,6 +75,25 @@ public class UserController {
             return Result.success(result);
         } else {
             return Result.error("401", "用户名或密码错误");
+        }
+    }
+
+    @PostMapping("/register")
+    public Result register(@RequestBody User user) {
+        try {
+            // 检查用户名是否已存在
+            User existingUser = userService.selectByUsername(user.getUsername());
+            if (existingUser != null) {
+                return Result.error("400", "用户名已存在");
+            }
+            
+            System.out.println("接收到注册用户数据: " + user.toString());
+            userService.add(user);
+            return Result.success("用户注册成功");
+        } catch (Exception e) {
+            System.err.println("用户注册失败: " + e.getMessage());
+            e.printStackTrace();
+            return Result.error("500", "用户注册失败: " + e.getMessage());
         }
     }
 

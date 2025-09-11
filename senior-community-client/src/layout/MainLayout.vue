@@ -19,16 +19,16 @@ const activeIndex = ref('1');
 const handleSelect = (key) => {
   switch (key) {
     case '1':
-      router.push('/');
+      router.push('/home');
       break;
     case '2':
-      router.push('/service-mall');
+      router.push('/home/service-mall');
       break;
     case '3':
-      router.push('/activity-center');
+      router.push('/home/activity-center');
       break;
     case '4':
-      router.push('/user');
+      router.push('/home/user');
       break;
   }
 };
@@ -36,13 +36,21 @@ const handleSelect = (key) => {
 // 处理下拉菜单命令
 const handleCommand = (command) => {
   switch (command) {
+    case 'login':
+      router.push('/login');
+      break;
     case 'profile':
-      router.push('/user');
+      router.push('/home/user');
       break;
     case 'logout':
       handleLogout();
       break;
   }
+};
+
+// 处理登录按钮点击
+const handleLogin = () => {
+  router.push('/login');
 };
 
 // 退出登录
@@ -105,29 +113,50 @@ const handleLogout = async () => {
             </el-menu-item>
           </el-menu>
           <div class="user-actions">
-            <div class="user-info">
-              <el-avatar :src="userStore.userInfo.avatar" :size="32">
-                {{ userStore.userInfo.name?.charAt(0) || 'U' }}
-              </el-avatar>
-              <span class="username">{{ userStore.username }}</span>
-            </div>
-            <el-dropdown @command="handleCommand">
-              <el-button type="primary" plain circle>
-                <el-icon><Setting /></el-icon>
-              </el-button>
-              <template #dropdown>
-                <el-dropdown-menu>
-                  <el-dropdown-item command="profile">
-                    <el-icon><User /></el-icon>
-                    个人资料
-                  </el-dropdown-item>
-                  <el-dropdown-item command="logout" divided>
-                    <el-icon><SwitchButton /></el-icon>
-                    退出登录
-                  </el-dropdown-item>
-                </el-dropdown-menu>
-              </template>
-            </el-dropdown>
+            <!-- 已登录状态 -->
+            <template v-if="userStore.isLoggedIn">
+              <div class="user-info">
+                <el-avatar :src="userStore.userInfo.avatar" :size="32">
+                  {{ userStore.userInfo.name?.charAt(0) || 'U' }}
+                </el-avatar>
+                <span class="username">{{ userStore.userInfo.name || '用户' }}</span>
+              </div>
+              <el-dropdown @command="handleCommand">
+                <el-button type="primary" plain circle>
+                  <el-icon><Setting /></el-icon>
+                </el-button>
+                <template #dropdown>
+                  <el-dropdown-menu>
+                    <el-dropdown-item command="profile">
+                      <el-icon><User /></el-icon>
+                      个人资料
+                    </el-dropdown-item>
+                    <el-dropdown-item command="logout" divided>
+                      <el-icon><SwitchButton /></el-icon>
+                      退出登录
+                    </el-dropdown-item>
+                  </el-dropdown-menu>
+                </template>
+              </el-dropdown>
+            </template>
+            
+            <!-- 未登录状态 -->
+            <template v-else>
+              <el-dropdown @command="handleCommand">
+                <el-button type="primary" plain>
+                  <el-icon><User /></el-icon>
+                  用户操作
+                </el-button>
+                <template #dropdown>
+                  <el-dropdown-menu>
+                    <el-dropdown-item command="login">
+                      <el-icon><User /></el-icon>
+                      登录
+                    </el-dropdown-item>
+                  </el-dropdown-menu>
+                </template>
+              </el-dropdown>
+            </template>
           </div>
         </div>
       </el-header>

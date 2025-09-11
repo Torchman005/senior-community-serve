@@ -93,31 +93,6 @@ const getActivityDescription = () => {
 onMounted(() => {
   loadActivityTypes();
 });
-    title: '广场舞联谊会',
-    image: '#8e44ad',
-    date: '2023-12-19',
-    time: '19:00-21:00',
-    location: '文化公园',
-    address: '北京市西城区文化路88号',
-    participants: 45,
-    maxParticipants: 60,
-    description: '多个社区广场舞队伍齐聚一堂，交流舞蹈技巧，共同表演精彩节目。',
-    status: 'upcoming'
-  },
-  {
-    id: 204,
-    title: '郊外一日游',
-    image: '#27ae60',
-    date: '2023-12-23',
-    time: '08:00-17:00',
-    location: '集合地点：和平社区门口',
-    address: '北京市东城区和平里北街18号',
-    participants: 32,
-    maxParticipants: 40,
-    description: '前往近郊森林公园，呼吸新鲜空气，欣赏自然风光，包含午餐和交通。',
-    status: 'upcoming'
-  }
-]);
 
 // 创意工坊数据
 const creativeWorks = ref([
@@ -342,38 +317,8 @@ const submitPublish = () => {
       </div>
     </div>
 
-
-          <div class="activity-image">
-            <img :src="activity.image" :alt="activity.title">
-            <div class="activity-status" :class="activity.status">
-              {{ activity.status === 'upcoming' ? '即将开始' : activity.status === 'ongoing' ? '进行中' : '已结束' }}
-            </div>
-          </div>
-          <div class="activity-info">
-            <h3>{{ activity.title }}</h3>
-            <p class="activity-time">
-              <el-icon><Calendar /></el-icon>
-              {{ activity.date }} {{ activity.time }}
-            </p>
-            <p v-if="activity.location" class="activity-location">
-              <el-icon><Location /></el-icon>
-              {{ activity.location }}
-            </p>
-            <div class="activity-participants">
-              <el-progress
-                :percentage="Math.round((activity.participants / activity.maxParticipants) * 100)"
-                :format="() => `${activity.participants}/${activity.maxParticipants}`"
-                :stroke-width="10"
-              ></el-progress>
-            </div>
-            <el-button type="primary" size="small">查看详情</el-button>
-          </div>
-        </el-card>
-      </div>
-    </div>
-
     <!-- 创意工坊 -->
-    <div v-if="activeType.id === 3" class="activity-list">
+    <div v-if="activeType?.id === 3" class="activity-list">
       <h2>创意工坊</h2>
       <p class="activity-description">展示老年人的才艺作品，接受预订或义卖，实现社会价值</p>
       
@@ -628,7 +573,7 @@ const submitPublish = () => {
             list-type="picture-card"
             :auto-upload="false"
           >
-            <el-icon><Plus /></el-icon>
+            <el-icon><Plus></Plus></el-icon>
           </el-upload>
           <div class="el-upload__tip">请上传活动宣传图片，建议尺寸800x600像素</div>
         </el-form-item>

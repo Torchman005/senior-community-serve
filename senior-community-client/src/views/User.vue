@@ -21,8 +21,13 @@ const activities = ref([]);
 
 // 收藏数据
 const favorites = ref([]);
-  }
-]);
+
+// 通知设置
+const notificationSettings = reactive({
+  serviceReminder: true,
+  activityReminder: true,
+  emergencyContactNotification: true
+});
 
 // 编辑个人信息对话框
 const editProfileVisible = ref(false);
@@ -91,8 +96,41 @@ const loadUserActivities = async () => {
   }
 };
 
+// 处理图片加载错误
+const handleImageError = (event) => {
+  event.target.src = '/favicon.ico';
+};
+
+// 检查用户登录状态
+const checkUserLogin = () => {
+  if (!userStore.isLoggedIn || !userStore.userInfo.id) {
+    ElMessage.warning('请先登录');
+    // 可以跳转到登录页面
+    // router.push('/login');
+    return false;
+  }
+  return true;
+};
+
 // 组件挂载时加载数据
 onMounted(() => {
+  // 检查登录状态
+  if (!checkUserLogin()) {
+    return;
+  }
+  
+  // 如果用户信息为空，尝试从localStorage恢复
+  if (!userStore.userInfo.name) {
+    userStore.restoreLoginState();
+  }
+  
+  // 调试信息
+  console.log('用户信息状态:', {
+    isLoggedIn: userStore.isLoggedIn,
+    userInfo: userStore.userInfo,
+    token: userStore.token
+  });
+  
   loadUserInfo();
   loadUserOrders();
   loadUserActivities();
@@ -149,6 +187,19 @@ const removeFavorite = (index) => {
     // 取消操作
   });
 };
+
+// 测试函数：清除localStorage
+const clearLocalStorage = () => {
+  localStorage.removeItem('token');
+  localStorage.removeItem('userInfo');
+  ElMessage.success('localStorage已清除，请刷新页面查看效果');
+};
+
+// 测试函数：重新恢复登录状态
+const restoreLoginState = () => {
+  userStore.restoreLoginState();
+  ElMessage.success('已重新恢复登录状态');
+};
 </script>
 
 <template>
@@ -157,18 +208,31 @@ const removeFavorite = (index) => {
       <h1>个人中心</h1>
     </div>
 
+    <!-- 调试信息卡片 -->
+    <el-card class="debug-info-card" style="margin-bottom: 20px; background-color: #f0f9ff; border: 1px solid #0ea5e9;">
+      <h3>调试信息</h3>
+      <p>登录状态: {{ userStore.isLoggedIn ? '已登录' : '未登录' }}</p>
+      <p>用户ID: {{ userStore.userInfo.id || '无' }}</p>
+      <p>Token: {{ userStore.token ? '已设置' : '未设置' }}</p>
+      <p>用户信息: {{ JSON.stringify(userStore.userInfo, null, 2) }}</p>
+      <div style="margin-top: 10px;">
+        <el-button size="small" type="warning" @click="clearLocalStorage">清除localStorage(测试)</el-button>
+        <el-button size="small" type="info" @click="restoreLoginState">重新恢复登录状态</el-button>
+      </div>
+    </el-card>
+
     <!-- 个人信息卡片 -->
     <el-card class="user-profile-card">
       <div class="user-profile">
         <div class="user-avatar">
-          <img :src="userStore.userInfo.avatar" alt="用户头像">
+          <img :src="userStore.userInfo.avatar || '/favicon.ico'" alt="用户头像" @error="handleImageError">
         </div>
         <div class="user-info">
-          <h2>{{ userStore.userInfo.name }}</h2>
-          <p><el-icon><User /></el-icon> {{ userStore.userInfo.age }}岁</p>
-          <p><el-icon><Phone /></el-icon> {{ userStore.userInfo.phone }}</p>
-          <p><el-icon><Location /></el-icon> {{ userStore.userInfo.address }}</p>
-          <p><el-icon><Bell /></el-icon> 紧急联系人：{{ userStore.userInfo.emergencyContact }}</p>
+          <h2>{{ userStore.userInfo.name || '未设置姓名' }}</h2>
+          <p><el-icon><User /></el-icon> {{ userStore.userInfo.age || '未设置' }}岁</p>
+          <p><el-icon><Phone /></el-icon> {{ userStore.userInfo.phone || '未设置手机号' }}</p>
+          <p><el-icon><Location /></el-icon> {{ userStore.userInfo.address || '未设置地址' }}</p>
+          <p><el-icon><Bell /></el-icon> 紧急联系人：{{ userStore.userInfo.emergencyContact || '未设置' }}</p>
         </div>
         <div class="user-actions">
           <el-button type="primary" @click="openEditProfile">编辑资料</el-button>
@@ -313,21 +377,21 @@ const removeFavorite = (index) => {
                   <h4>服务提醒</h4>
                   <p>服务开始前的提醒通知</p>
                 </div>
-                <el-switch v-model="true"></el-switch>
+                <el-switch v-model="notificationSettings.serviceReminder"></el-switch>
               </div>
               <div class="settings-item">
                 <div class="settings-item-info">
                   <h4>活动提醒</h4>
                   <p>活动开始前的提醒通知</p>
                 </div>
-                <el-switch v-model="true"></el-switch>
+                <el-switch v-model="notificationSettings.activityReminder"></el-switch>
               </div>
               <div class="settings-item">
                 <div class="settings-item-info">
                   <h4>紧急联系人通知</h4>
                   <p>服务完成后通知紧急联系人</p>
                 </div>
-                <el-switch v-model="true"></el-switch>
+                <el-switch v-model="notificationSettings.emergencyContactNotification"></el-switch>
               </div>
             </el-card>
           </div>

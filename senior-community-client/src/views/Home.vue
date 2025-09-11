@@ -13,19 +13,19 @@ const features = ref([
     title: '一站式服务商城',
     description: '提供医疗健康、生活照料、紧急维修等多种服务，满足老年人日常生活需求',
     icon: 'ShoppingBag',
-    path: '/service-mall'
+    path: '/home/service-mall'
   },
   {
     title: '动态活动中心',
     description: '丰富多彩的线上线下活动，让老年人展示才艺，结交朋友，实现社会价值',
     icon: 'Calendar',
-    path: '/activity-center'
+    path: '/home/activity-center'
   },
   {
     title: '个人中心',
     description: '管理个人信息、订单记录、活动参与情况，一站式管理个人账户',
     icon: 'User',
-    path: '/user'
+    path: '/home/user'
   }
 ]);
 
@@ -55,7 +55,7 @@ const testimonials = ref([
             <div class="carousel-text">
               <h2>一站式服务商城</h2>
               <p>解决日常照护与维修痛点，打造可信赖的本地生活服务网络</p>
-              <el-button type="primary" size="large" @click="navigateTo('/service-mall')">立即体验</el-button>
+              <el-button type="primary" size="large" @click="navigateTo('/home/service-mall')">立即体验</el-button>
             </div>
           </div>
         </el-carousel-item>
@@ -64,7 +64,7 @@ const testimonials = ref([
             <div class="carousel-text">
               <h2>动态活动中心</h2>
               <p>丰富多彩的线上线下活动，展示才艺，结交朋友</p>
-              <el-button type="primary" size="large" @click="navigateTo('/activity-center')">查看活动</el-button>
+              <el-button type="primary" size="large" @click="navigateTo('/home/activity-center')">查看活动</el-button>
             </div>
           </div>
         </el-carousel-item>
@@ -73,7 +73,7 @@ const testimonials = ref([
             <div class="carousel-text">
               <h2>乐享晚年，品质生活</h2>
               <p>为老年人提供全方位的生活服务和社交平台</p>
-              <el-button type="primary" size="large" @click="navigateTo('/user')">加入我们</el-button>
+              <el-button type="primary" size="large" @click="navigateTo('/home/user')">加入我们</el-button>
             </div>
           </div>
         </el-carousel-item>

@@ -6,13 +6,23 @@ const router = createRouter({
   history: createWebHistory(import.meta.env.BASE_URL),
   routes: [
     {
+      path: '/',
+      redirect: '/login'
+    },
+    {
       path: '/login',
       name: 'login',
       component: () => import('../views/Login.vue'),
       meta: { requiresAuth: false }
     },
     {
-      path: '/',
+      path: '/register',
+      name: 'register',
+      component: () => import('../views/Register.vue'),
+      meta: { requiresAuth: false }
+    },
+    {
+      path: '/home',
       component: MainLayout,
       meta: { requiresAuth: true },
       children: [
@@ -57,7 +67,7 @@ router.beforeEach((to, from, next) => {
   
   // 如果已登录用户访问登录页，重定向到首页
   if (to.name === 'login' && userStore.isLoggedIn) {
-    next('/')
+    next('/home')
     return
   }
   

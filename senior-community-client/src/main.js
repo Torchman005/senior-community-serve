@@ -17,7 +17,7 @@ for (const [key, component] of Object.entries(ElementPlusIconsVue)) {
 }
 
 // 配置axios
-axios.defaults.baseURL = 'http://localhost:8080'
+axios.defaults.baseURL = 'http://localhost:8081'
 app.config.globalProperties.$http = axios
 
 const pinia = createPinia()

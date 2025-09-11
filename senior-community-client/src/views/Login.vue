@@ -94,7 +94,7 @@ const handleLogin = async () => {
     await userStore.login(loginForm)
     
     ElMessage.success('登录成功！')
-    router.push('/')
+    router.push('/home')
   } catch (error) {
     console.error('登录失败:', error)
     ElMessage.error(error.response?.data?.message || '登录失败，请检查用户名和密码')

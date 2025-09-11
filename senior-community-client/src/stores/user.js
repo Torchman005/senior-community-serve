@@ -1,5 +1,5 @@
 import { defineStore } from 'pinia'
-import { login as apiLogin, logout as apiLogout, getUserInfo } from '@/api/user'
+import { userApi } from '@/api/index'
 
 export const useUserStore = defineStore('user', {
   state: () => ({
@@ -21,7 +21,7 @@ export const useUserStore = defineStore('user', {
     // 登录
     async login(credentials) {
       try {
-        const response = await apiLogin(credentials)
+        const response = await userApi.login(credentials)
         const { token, user } = response.data
         
         this.token = token
@@ -41,27 +41,13 @@ export const useUserStore = defineStore('user', {
     // 退出登录
     async logout() {
       try {
-        await apiLogout()
+        // 暂时不调用后端logout接口，直接清除本地状态
+        console.log('用户退出登录')
       } catch (error) {
         console.error('退出登录失败:', error)
       } finally {
-        // 清除状态
-        this.token = null
-        this.userInfo = {
-          id: null,
-          name: '',
-          age: 0,
-          phone: '',
-          address: '',
-          emergencyContact: '',
-          avatar: '',
-          role: 'user'
-        }
-        this.isLoggedIn = false
-        
-        // 清除本地存储
-        localStorage.removeItem('token')
-        localStorage.removeItem('userInfo')
+        // 清除登录状态
+        this.clearLoginState()
       }
     },
     
@@ -84,10 +70,44 @@ export const useUserStore = defineStore('user', {
       const userInfo = localStorage.getItem('userInfo')
       
       if (token && userInfo) {
-        this.token = token
-        this.userInfo = JSON.parse(userInfo)
-        this.isLoggedIn = true
+        try {
+          const parsedUserInfo = JSON.parse(userInfo)
+          // 验证用户信息的有效性
+          if (parsedUserInfo && parsedUserInfo.id && parsedUserInfo.name) {
+            this.token = token
+            this.userInfo = parsedUserInfo
+            this.isLoggedIn = true
+          } else {
+            // 用户信息无效，清除本地存储
+            this.clearLoginState()
+          }
+        } catch (error) {
+          // JSON解析失败，清除本地存储
+          console.error('解析用户信息失败:', error)
+          this.clearLoginState()
+        }
+      } else {
+        // 没有完整的登录信息，确保状态为未登录
+        this.clearLoginState()
       }
+    },
+    
+    // 清除登录状态
+    clearLoginState() {
+      this.token = null
+      this.userInfo = {
+        id: null,
+        name: '',
+        age: 0,
+        phone: '',
+        address: '',
+        emergencyContact: '',
+        avatar: '',
+        role: 'user'
+      }
+      this.isLoggedIn = false
+      localStorage.removeItem('token')
+      localStorage.removeItem('userInfo')
     },
     
     // 更新用户信息
